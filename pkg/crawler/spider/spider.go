@@ -11,8 +11,7 @@ import (
 type Service struct{}
 
 func New() *Service {
-	s := Service{}
-	return &s
+	return &Service{}
 }
 
 func (s *Service) Scan(url string, depth int) ([]crawler.Document, error) {

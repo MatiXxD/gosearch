@@ -9,5 +9,5 @@ type Document struct {
 	ID    int
 	URL   string
 	Title string
-	Body  string
+	// Body  string
 }

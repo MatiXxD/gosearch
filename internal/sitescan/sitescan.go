@@ -3,7 +3,7 @@ package sitescan
 import (
 	"gosearch/pkg/crawler"
 	"gosearch/pkg/crawler/spider"
-	"strings"
+	"gosearch/pkg/index"
 )
 
 func ScanSites(urls, words []string, depth int) (map[string][]string, error) {
@@ -18,19 +18,42 @@ func ScanSites(urls, words []string, depth int) (map[string][]string, error) {
 		allPages = append(allPages, scanned...)
 	}
 
+	for i := range allPages {
+		allPages[i].ID = i
+	}
+
 	return filterWords(allPages, words), nil
 }
 
 func filterWords(pages []crawler.Document, words []string) map[string][]string {
+	ind := index.New()
+	ind.Add(pages)
+
 	filtered := make(map[string][]string, len(words))
 	for _, word := range words {
-		slice := []string{}
-		for _, page := range pages {
-			if strings.Contains(strings.ToLower(page.Title), strings.ToLower(word)) {
-				slice = append(slice, page.URL)
+		ids := ind.Get(word)
+		urls := []string{}
+		for _, id := range ids {
+			if url := binarySearch(pages, id); url != "" {
+				urls = append(urls, binarySearch(pages, id))
 			}
 		}
-		filtered[word] = slice
+		filtered[word] = urls
 	}
 	return filtered
+}
+
+func binarySearch(pages []crawler.Document, id int) string {
+	i, j := 0, len(pages)-1
+	for i <= j {
+		mid := (i + j) / 2
+		if pages[mid].ID == id {
+			return pages[mid].URL
+		} else if pages[mid].ID < id {
+			i = mid + 1
+		} else {
+			j = mid - 1
+		}
+	}
+	return ""
 }

@@ -6,16 +6,18 @@ import (
 )
 
 type Service struct {
+	Pages  []crawler.Document
 	revInd map[string][]int
 }
 
 func New() *Service {
 	return &Service{
-		make(map[string][]int),
+		revInd: make(map[string][]int),
 	}
 }
 
 func (s *Service) Add(docs []crawler.Document) {
+	s.Pages = docs
 	for _, doc := range docs {
 		words := strings.Fields(doc.Title)
 		for _, word := range words {

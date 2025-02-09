@@ -2,8 +2,8 @@ package main
 
 import (
 	"gosearch/internal/sitescan"
+	"gosearch/internal/webapp"
 	"gosearch/pkg/index"
-	"gosearch/pkg/netsrv"
 	"log"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	ind.Add(pages)
 	log.Println("Index created")
 
-	s := netsrv.New("8091", ind)
+	s := webapp.New(":8091", ind)
 	if err := s.Run(); err != nil {
 		log.Fatal(err)
 	}

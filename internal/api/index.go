@@ -13,3 +13,7 @@ func (a *API) GetIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (a *API) NewIndex(w http.ResponseWriter, r *http.Request) {
+	a.IndexService.RecreateIndex()
+}

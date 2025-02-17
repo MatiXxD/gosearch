@@ -83,6 +83,45 @@ func (a *API) GetDocument(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (a *API) DeleteDocument(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Wrong document id", http.StatusBadRequest)
+		return
+	}
+
+	if err := a.IndexService.DeleteDoc(id); err != nil {
+		http.Error(w, "Can't find doc", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *API) UpdateDocument(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, "Wrong document id", http.StatusBadRequest)
+		return
+	}
+
+	var doc crawler.Document
+	defer r.Body.Close()
+	if err := json.NewDecoder(r.Body).Decode(&doc); err != nil {
+		http.Error(w, "Can't decode data", http.StatusUnprocessableEntity)
+		return
+	}
+
+	if err := a.IndexService.UpdateDoc(id, doc); err != nil {
+		http.Error(w, "Can't find doc", http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func isEmpty(filtered map[string][]string) bool {
 	for _, urls := range filtered {
 		if len(urls) > 0 {

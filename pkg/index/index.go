@@ -1,6 +1,7 @@
 package index
 
 import (
+	"fmt"
 	"gosearch/pkg/crawler"
 	"strings"
 )
@@ -17,6 +18,13 @@ func New() *Service {
 		RevInd:   make(map[string][]int),
 		curIndex: 0,
 	}
+}
+
+func (s *Service) RecreateIndex() {
+	pages := s.Pages
+	s.curIndex = 0
+	s.Pages = []crawler.Document{}
+	s.AddMulti(pages)
 }
 
 func (s *Service) AddDoc(doc crawler.Document) crawler.Document {
@@ -46,6 +54,45 @@ func (s *Service) GetDoc(id int) (crawler.Document, bool) {
 		}
 	}
 	return crawler.Document{}, false
+}
+
+func (s *Service) DeleteDoc(id int) error {
+	_, ok := s.GetDoc(id)
+	if !ok {
+		return fmt.Errorf("No document with id %d", id)
+	}
+
+	ind := 0
+	for i, d := range s.Pages {
+		if d.ID == id {
+			ind = i
+			break
+		}
+	}
+
+	s.Pages = append(s.Pages[:ind], s.Pages[ind+1:]...)
+
+	return nil
+}
+
+func (s *Service) UpdateDoc(id int, doc crawler.Document) error {
+	_, ok := s.GetDoc(id)
+	if !ok {
+		return fmt.Errorf("No document with id %d", id)
+	}
+
+	ind := 0
+	for i, d := range s.Pages {
+		if d.ID == id {
+			ind = i
+			break
+		}
+	}
+
+	doc.ID = s.Pages[ind].ID
+	s.Pages[ind] = doc
+
+	return nil
 }
 
 func (s *Service) AddMulti(docs []crawler.Document) {

@@ -1,26 +1,23 @@
 package webapp
 
 import (
+	"gosearch/internal/api"
 	"gosearch/pkg/index"
 	"log"
 	"net"
 	"net/http"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 type Server struct {
-	Addr         string
-	IndexService *index.Service
-	Mux          *mux.Router
+	Addr string
+	API  *api.API
 }
 
 func New(addr string, ind *index.Service) *Server {
 	return &Server{
-		Addr:         addr,
-		IndexService: ind,
-		Mux:          mux.NewRouter(),
+		Addr: addr,
+		API:  api.New(ind),
 	}
 }
 
@@ -29,7 +26,7 @@ func (s *Server) Run() error {
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 200 * time.Second,
 		Addr:         s.Addr,
-		Handler:      s.Mux,
+		Handler:      s.API.Mux,
 	}
 
 	listener, err := net.Listen("tcp4", s.Addr)
@@ -37,7 +34,7 @@ func (s *Server) Run() error {
 		log.Fatal(err)
 	}
 
-	s.BindRoutes()
+	s.API.BindRoutes()
 	log.Println("Server running on: " + s.Addr)
 
 	return server.Serve(listener)

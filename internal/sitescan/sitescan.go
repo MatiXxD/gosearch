@@ -17,9 +17,5 @@ func GetAllPages(urls []string, depth int) ([]crawler.Document, error) {
 		allPages = append(allPages, scanned...)
 	}
 
-	for i := range allPages {
-		allPages[i].ID = i
-	}
-
 	return allPages, nil
 }

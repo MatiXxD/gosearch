@@ -16,7 +16,7 @@ func main() {
 	}
 
 	ind := index.New()
-	ind.Add(pages)
+	ind.AddMulti(pages)
 	log.Println("Index created")
 
 	s := webapp.New(":8091", ind)

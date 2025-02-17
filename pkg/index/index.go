@@ -6,30 +6,51 @@ import (
 )
 
 type Service struct {
-	Pages  []crawler.Document `json:"docs"`
-	RevInd map[string][]int   `json:"index"`
+	Pages    []crawler.Document `json:"docs"`
+	RevInd   map[string][]int   `json:"index"`
+	curIndex int
 }
 
 func New() *Service {
 	return &Service{
-		RevInd: make(map[string][]int),
+		Pages:    []crawler.Document{},
+		RevInd:   make(map[string][]int),
+		curIndex: 0,
 	}
 }
 
-func (s *Service) Add(docs []crawler.Document) {
-	s.Pages = docs
-	for _, doc := range docs {
-		words := strings.Fields(doc.Title)
-		for _, word := range words {
-			word = strings.ToLower(word)
-			if _, ok := s.RevInd[word]; ok {
-				if !s.contains(word, doc.ID) {
-					s.RevInd[word] = append(s.RevInd[word], doc.ID)
-				}
-			} else {
-				s.RevInd[word] = []int{doc.ID}
+func (s *Service) AddDoc(doc crawler.Document) crawler.Document {
+	doc.ID = s.curIndex
+	s.curIndex++
+
+	s.Pages = append(s.Pages, doc)
+	words := strings.Fields(doc.Title)
+	for _, word := range words {
+		word = strings.ToLower(word)
+		if _, ok := s.RevInd[word]; ok {
+			if !s.contains(word, doc.ID) {
+				s.RevInd[word] = append(s.RevInd[word], doc.ID)
 			}
+		} else {
+			s.RevInd[word] = []int{doc.ID}
 		}
+	}
+
+	return doc
+}
+
+func (s *Service) GetDoc(id int) (crawler.Document, bool) {
+	for _, p := range s.Pages {
+		if p.ID == id {
+			return p, true
+		}
+	}
+	return crawler.Document{}, false
+}
+
+func (s *Service) AddMulti(docs []crawler.Document) {
+	for _, doc := range docs {
+		s.AddDoc(doc)
 	}
 }
 

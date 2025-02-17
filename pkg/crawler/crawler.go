@@ -6,9 +6,9 @@ type Interface interface {
 }
 
 type Document struct {
-	ID    int
-	URL   string
-	Title string
+	ID    int    `json:"id"`
+	URL   string `json:"url"`
+	Title string `json:"title"`
 	// Body  string
 }
 
